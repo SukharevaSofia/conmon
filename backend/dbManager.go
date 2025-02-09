@@ -23,29 +23,31 @@ func connectDB() (*sql.DB, error) {
 }
 
 func initDB() {
-  var db *sql.DB
-  var err error
-  for {
-    log.Println("Attempting connection to DB")
-    db, err = connectDB()
-    if err == nil {
-      break
-    }
-    time.Sleep(time.Microsecond * 100)
-  }
+	var db *sql.DB
+	var err error
+	for {
+		log.Println("Attempting connection to DB")
+		db, err = connectDB()
+		if err == nil {
+			break
+		}
+		time.Sleep(time.Microsecond * 100)
+	}
 	defer db.Close()
 
-
-	log.Println("Table creation")
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS containers" +
-		"(ip text PRIMARY KEY UNIQUE NOT NULL,ping_time timestamp, last_success timestamp)")
-	if err != nil {
-		log.Println("Table creation error:", err)
-    panic(err)
-	} else {
-		log.Println("Table conainers created")
+	for {
+		log.Println("Table creation")
+		_, err = db.Exec("CREATE TABLE IF NOT EXISTS containers" +
+			"(ip text PRIMARY KEY UNIQUE NOT NULL,ping_time timestamp, last_success timestamp)")
+		if err != nil {
+			log.Println("Table creation error:", err)
+      continue
+		} else {
+			log.Println("Table conainers created")
+		}
+		log.Println("createDb done;")
+    break;
 	}
-	log.Println("createDb done;")
 }
 
 func readDB() ([]tableRow, error) {
