@@ -1,0 +1,41 @@
+services:
+  db:
+    container_name: conmon-db
+    build:
+      context: ./
+      dockerfile: postgres.Dockerfile
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: vk
+      POSTGRES_PASSWORD: contest
+
+  backend:
+    container_name: conmon-backend
+    build:
+      context: ./backend
+    restart: always
+    environment:
+      DATABASE_URL: "postgres://vk:contest@conmon-db/postgres?sslmode=disable"
+
+  frontend:
+    container_name: conmon-frontend
+    build:
+      context: ./frontend
+    restart: always
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    ports:
+      - "1337:80"
+
+  pinger:
+    container_name: conmon-pinger
+    build:
+      context: ./pinger
+    restart: always
+    volumes: 
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    environment:
+      DOCKER_SOCKET: "/var/run/docker.sock"
+      PING_INTERVAL_MS: 900
